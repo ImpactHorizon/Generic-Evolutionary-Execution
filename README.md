@@ -1,2 +1,2 @@
-# quasImago
-Python module using @pyevolve with CGP modification to obtain image processing schema.
+# Generic Evolution Executor
+Python module using @pyevolve to create config-based evolution schema execution.
