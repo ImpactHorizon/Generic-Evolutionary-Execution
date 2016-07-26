@@ -3,6 +3,7 @@ from mock import MagicMock, patch
 import sys
 import random
 import socket
+import math
 from gee import Util
 
 class ValidatorsTestCase(unittest.TestCase):    
@@ -51,23 +52,19 @@ class ValidatorsTestCase(unittest.TestCase):
             Util.validate_type(ValidatorsTestCase.str_type, int, "test_str")
             
         with self.assertRaises(ValueError): 
-            Util.validate_type(ValidatorsTestCase.int_type, float, "test_int")
-            
-        with self.assertRaises(ValueError): 
-            Util.validate_type(ValidatorsTestCase.float_type, bool, 
-                                "test_float")
+            Util.validate_type(ValidatorsTestCase.str_type, float, "test_float")            
             
         with self.assertRaises(ValueError): 
             Util.validate_type(ValidatorsTestCase.bool_type, object, 
-                                "test_bool")
+                                "test_object")
             
         with self.assertRaises(ValueError): 
             Util.validate_type(ValidatorsTestCase.object_type, 
-                                ValidatorsTestCase.Derived, "test_object")
+                                ValidatorsTestCase.Derived, "test_derived")
             
         with self.assertRaises(ValueError): 
             Util.validate_type(ValidatorsTestCase.derived_type, object, 
-                                "test_derived")
+                                "test_object")
                                 
     def test_on_list_exists(self):
         self.assertEqual(ValidatorsTestCase.acceptables[-1], 
@@ -125,11 +122,11 @@ class ValidatorsTestCase(unittest.TestCase):
                 Util.validate_percent(val, "test_percent_bad")
                 
     def test_port_correct(self):
-        port = "8080"
+        port = 8080
         self.assertEqual(port, Util.validate_tcp_port(port, "test_port_ok"))
                                                     
     def test_port_incorrect(self):
-        port = "8080"
+        port = 8080
         listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         listen_socket.bind(('127.0.0.1', int(port)))        
         with self.assertRaises(ValueError):
@@ -156,3 +153,12 @@ class ValidatorsTestCase(unittest.TestCase):
         func_name = 'shakaron_makaron'
         with self.assertRaises(ValueError):
             Util.validate_function_callable(func_name, "test_func_bad")
+            
+    def test_chain_validator(self):
+        def sin(x, name):
+            return math.sin(x)
+        validators = [sin, sin, sin]
+        val=5
+        ret=Util.chain_validation(val, validators, "chain")
+        self.assertTrue(len(validators) == 3)
+        self.assertEqual(ret, math.sin(math.sin(math.sin(val))))

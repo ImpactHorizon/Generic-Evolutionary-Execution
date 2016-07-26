@@ -1,10 +1,19 @@
 import socket
 import FitnessFunctions
 
+def chain_validation(value, validators, name):    
+    for validator in validators:        
+        value=validator(value, name=name)
+    return value
+
 def validate_type(value, expected_type, name):
     if not type(value) is expected_type:
-        raise ValueError("Value of %s is not a %s." % (name, expected_type))
-    return value
+        try:
+            value = expected_type(value)
+        except:
+            raise ValueError("Cannot convert %s value to %s" 
+                                % (name, expected_type))        
+    return value    
 
 def validate_on_list(value, acceptables, name):
     assert(isinstance(acceptables, list))
@@ -29,7 +38,7 @@ def validate_percent(value, name):
 def validate_tcp_port(port, name):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        sock.bind(('127.0.0.1', int(port)))
+        sock.bind(('127.0.0.1', port))
     except:       
         raise ValueError("Value of %s is not accessible port (%s)." % (name, 
                                                                         port))
@@ -44,9 +53,12 @@ def validate_host_reachable(host, name):
     return host
     
 def validate_function_callable(func_name, name):
-    print FitnessFunctions
-    func = getattr(FitnessFunctions, func_name)
-    if not hasattr(func, '__call__'):
+    try:
+        func = getattr(FitnessFunctions, func_name)
+    except:
         raise ValueError("Value of %s (%s) is not function name from fitness "
                             "functions module" % (name, func_name))
+    if not hasattr(func, '__call__'):
+        raise ValueError("Value of %s (%s) is not callable function from "
+                            "fitness functions module" % (name, func_name))
     return func_name
