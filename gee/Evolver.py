@@ -48,10 +48,8 @@ class Evolver(object):
         self.slotsInitialization(Evolver)
     
     def slotsInitialization(self, cls):  
-        print type(self)
         validators = getattr(cls, '__validators__', {})
         for slot_name in getattr(cls, '__params__', []):
-            print slot_name
             value = self.configurator[slot_name]
             if validators[slot_name]:
                 value = self.validate(slot_name, value, validators)
